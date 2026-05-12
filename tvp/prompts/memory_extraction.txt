@@ -1,0 +1,45 @@
+You are an information-extraction system. From the passage below, extract a list of
+atomic, verifiable factual claims about the person it describes. Each claim must stand
+alone (no pronouns referring outside itself) and reflect something stated or strongly
+implied by the passage. Do NOT infer or invent.
+
+Return ONLY a JSON array. Each element has this exact shape:
+
+{
+  "claim": "<single fact, one sentence>",
+  "type": "professional_event | achievement | leadership | relationship | belief | preference | personal_fact | skill | education | other",
+  "entities": ["<named entity 1>", "<named entity 2>", "..."],
+  "date": "<ISO date OR freeform like 'Q2 2024' OR null>",
+  "metric": "<quantitative value like '$200K/year' or '60% reduction' OR null>",
+  "source_span": [<start_char>, <end_char>]
+}
+
+Rules:
+- Each claim is one self-contained sentence (no pronouns like "he", "she", "this").
+- `entities` includes companies, products, technologies, places, people, projects,
+  programs, and proper nouns. Preserve original casing.
+- `date` may be `null`. If a date appears in the passage, normalize to ISO if possible,
+  else keep the original ("Q2 2024", "summer 2023").
+- `metric` is `null` unless an explicit quantitative value is in the passage.
+- `source_span` is the character offset range within the passage where the supporting
+  text appears. Use 0-indexed inclusive start, exclusive end.
+- If the passage contains no extractable factual claims, return `[]`.
+
+Choose `type` honestly:
+- `professional_event`: a discrete work event (migration, launch, hire, etc.)
+- `achievement`: a measurable accomplishment
+- `leadership`: leading a team, mentoring, owning a domain
+- `relationship`: family, partnership, close colleagues
+- `belief`: stated belief or worldview
+- `preference`: stated like/dislike or way of working
+- `personal_fact`: bio (where born, where lives, age, language)
+- `skill`: technical or domain skill
+- `education`: degrees, schools, certifications
+- `other`: anything else worth remembering
+
+PASSAGE:
+"""
+{{passage}}
+"""
+
+Output ONLY the JSON array.

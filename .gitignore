@@ -1,0 +1,19 @@
+.env
+__pycache__/
+*.pyc
+.venv/
+venv/
+.DS_Store
+
+# Persona artifacts (large, regeneratable)
+personas/*/sources/
+personas/*/source_audio.*
+personas/*/memories.db
+
+# Runtime
+runs/
+stage_cache/
+
+# Models
+*.bin
+lid.176.bin

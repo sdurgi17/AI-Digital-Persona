@@ -1,0 +1,37 @@
+[ingest]
+chunk_size = 400
+chunk_overlap = 50
+embed_model = "BAAI/bge-m3"
+extract_memories = true
+memory_extraction_workers = 5
+language_detection_model = "lid.176.bin"
+
+[generation]
+llm_provider = "openrouter"
+llm_base_url = "https://openrouter.ai/api/v1"
+llm_model = "anthropic/claude-sonnet-4.5"
+entity_extraction_model = "anthropic/claude-haiku-4.5"
+temperature = 0.3
+max_tokens = 800
+chunk_score_threshold = 0.55
+memory_score_threshold = 0.60
+top_chunks = 3
+top_memories = 5
+refusal_phrase_telugu = "నాకు దీని గురించి తెలియదు"
+
+[tts]
+provider = "elevenlabs"
+model = "eleven_v3"
+fallback_model = "eleven_multilingual_v2"
+use_audio_tags = true
+output_format = "mp3_44100_128"
+
+[storage]
+qdrant_url = "http://localhost:6333"
+personas_root = "./personas"
+runs_root = "./runs"
+stage_cache_root = "./stage_cache"
+
+[logging]
+level = "INFO"
+conversation_log = true

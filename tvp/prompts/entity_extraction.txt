@@ -1,0 +1,15 @@
+Extract candidate named entities from the following question. Entities include
+companies, products, technologies, places, people, projects, programs, and other
+proper nouns. Return ONLY a JSON array of strings — no prose, no fences.
+
+Examples:
+Q: "What did you do at TOCA?"   → ["TOCA"]
+Q: "How did the Redshift migration go?" → ["Redshift"]
+Q: "Tell me about your family"  → []
+
+Question:
+"""
+{{question}}
+"""
+
+Output ONLY the JSON array.
