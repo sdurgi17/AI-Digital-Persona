@@ -1,0 +1,16 @@
+.git
+.gitignore
+.DS_Store
+.env
+.venv
+venv
+__pycache__
+*.pyc
+
+personas/
+runs/
+stage_cache/
+
+spec.md
+square_item_pull.py
+.claude/
