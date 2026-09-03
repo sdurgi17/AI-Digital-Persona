@@ -197,7 +197,7 @@ const EN = {
   youTag: 'YOU',
   echoTag: 'YOUR ECHO',
   callHint:
-    'Just talk — Echo listens, thinks and answers in your cloned voice. If it connects but stays silent, the custom-LLM tunnel is probably down.',
+    'Just talk — Echo listens, thinks and answers in your cloned voice. Calls are in English; use text chat for Telugu.',
 };
 
 type Strings = typeof EN;
@@ -338,7 +338,7 @@ const TE: Strings = {
   youTag: 'మీరు',
   echoTag: 'మీ ECHO',
   callHint:
-    'మాట్లాడండి చాలు — Echo వింటుంది, ఆలోచించి మీ క్లోన్ గొంతులో సమాధానం ఇస్తుంది. కనెక్ట్ అయ్యి కూడా మౌనంగా ఉంటే, custom-LLM టన్నెల్ డౌన్ అయి ఉండొచ్చు.',
+    'మాట్లాడండి చాలు — Echo వింటుంది, ఆలోచించి మీ క్లోన్ గొంతులో సమాధానం ఇస్తుంది. కాల్స్ ఇంగ్లీష్‌లో మాత్రమే; తెలుగు కోసం టెక్స్ట్ చాట్ వాడండి.',
 };
 
 const DICT: Record<Lang, Strings> = { en: EN, te: TE };

@@ -33,6 +33,13 @@ class Settings(BaseSettings):
     stt_model_id: str = "scribe_v2"
     tts_model_id: str = "eleven_flash_v2_5"
 
+    # ElevenLabs refuses a custom LLM on an agent that uses an Instant Voice Clone,
+    # so "builtin" runs the agent on an ElevenLabs-hosted model with our persona
+    # prompt + their knowledge base. "custom" keeps the /v1 gateway (needs a
+    # non-IVC voice). See backend/app/routers/agent.py.
+    agent_llm_mode: str = "builtin"  # builtin | custom
+    agent_llm: str = "claude-haiku-4-5"
+
     custom_llm_shared_secret: str = ""
     public_base_url: str = ""  # e.g. https://xxxx.ngrok-free.app
 

@@ -89,8 +89,21 @@ A wrong api_key must return 401. If this streams correctly, the voice agent will
 
 ## Gotchas
 
-- **Silent agent in voice chat** ⇒ the tunnel is down or `PUBLIC_BASE_URL` changed.
-  Restart the tunnel, update `.env`, restart uvicorn, hit "Re-sync" on the dashboard.
+- **A cloned voice restricts which brain the agent can use.** ElevenLabs rejects a
+  custom LLM on an agent whose voice is an **Instant** Voice Clone
+  (`custom_llm_not_allowed_in_with_agent_with_ivc_voice`) — undocumented, enforced
+  only at the API. So `AGENT_LLM_MODE=builtin` (their model + their knowledge base)
+  is the only option with an IVC. A **Professional** Voice Clone lifts the
+  restriction, which is what makes `AGENT_LLM_MODE=custom` — your own gateway and
+  sqlite-vec RAG — possible. Point the persona at a PVC trained in their dashboard
+  with `PUT /api/persona/voice`.
+- **Editing `.env` alone changes nothing.** `get_settings()` is cached and `--reload`
+  watches `backend/`, not the repo-root `.env` — restart uvicorn after every edit.
+- **Telugu live calls are not possible.** ElevenLabs Agents supports `hi` and `ta` but
+  not `te`, so calls are English-only; text chat still handles Telugu.
+- **Silent agent in voice chat** ⇒ the tunnel is down or `PUBLIC_BASE_URL` changed
+  (only matters in `custom` mode). Restart the tunnel, update `.env`, restart uvicorn,
+  hit "Re-sync" on the dashboard.
 - **Voice quality** is capped by recording quality: quiet room, consistent tone.
   ElevenLabs may flag the voice `requires_verification` (check their dashboard).
 - **Changing `EMBEDDING_PROVIDER`/`EMBEDDING_MODEL`** after ingesting refuses to mix vectors:

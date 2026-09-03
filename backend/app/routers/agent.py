@@ -8,6 +8,7 @@ from fastapi import APIRouter, HTTPException
 
 from ..config import get_settings
 from ..db import get_db
+from ..services.knowledge_base import sync_knowledge_base
 
 router = APIRouter()
 
@@ -39,30 +40,45 @@ async def _ensure_secret(client: httpx.AsyncClient) -> str:
     return resp.json()["secret_id"]
 
 
-def _agent_payload(persona, secret_id: str) -> dict:
+def _agent_payload(persona, secret_id: str | None, knowledge_base: list[dict]) -> dict:
+    """Build the agent config for the configured LLM mode.
+
+    builtin: an ElevenLabs-hosted model + their knowledge base. Required whenever
+             the voice is an Instant Voice Clone — the API rejects a custom LLM
+             on an IVC voice ("custom_llm_not_allowed_in_with_agent_with_ivc_voice").
+    custom:  our own /v1 gateway (local sqlite-vec RAG). Needs a non-IVC voice.
+    """
     settings = get_settings()
+
+    prompt: dict = {"prompt": persona["system_prompt"], "tools": []}
+    if settings.agent_llm_mode == "custom":
+        prompt["llm"] = "custom-llm"
+        prompt["custom_llm"] = {
+            "url": settings.public_base_url.rstrip("/") + "/v1",
+            "model_id": "persona-rag",
+            "api_key": {"secret_id": secret_id},
+        }
+        # Our gateway injects its own retrieval, so drop any knowledge base left
+        # attached by a previous builtin-mode provision rather than sending the
+        # same material twice.
+        prompt["knowledge_base"] = []
+    else:
+        prompt["llm"] = settings.agent_llm
+        if knowledge_base:
+            prompt["knowledge_base"] = knowledge_base
+
     return {
         "name": f"{persona['name']} (digital persona)",
         "conversation_config": {
             "agent": {
                 "first_message": f"Hey, this is {persona['name']}. What's on your mind?",
                 "language": "en",
-                "prompt": {
-                    "prompt": persona["system_prompt"],
-                    "llm": "custom-llm",
-                    "custom_llm": {
-                        "url": settings.public_base_url.rstrip("/") + "/v1",
-                        "model_id": "persona-rag",
-                        "api_key": {"secret_id": secret_id},
-                    },
-                    "tools": [],
-                },
+                "prompt": prompt,
             },
             "tts": {
                 "voice_id": persona["voice_id"],
                 "model_id": settings.tts_model_id,
             },
-            "language_presets": {"te": {"overrides": {}}},
         },
         "platform_settings": {
             "overrides": {"conversation_config_override": {"agent": {"language": True}}},
@@ -81,14 +97,20 @@ async def provision_agent() -> dict:
             raise HTTPException(400, "Build the persona first (POST /api/persona/build)")
         if not persona["voice_id"]:
             raise HTTPException(400, "Clone the voice first (POST /api/voice/clone)")
-        if not settings.public_base_url:
-            raise HTTPException(400, "PUBLIC_BASE_URL is not set — start your tunnel (e.g. ngrok http 8000) and put its URL in .env")
-        if not settings.custom_llm_shared_secret:
-            raise HTTPException(400, "CUSTOM_LLM_SHARED_SECRET is not set in .env")
+        if settings.agent_llm_mode == "custom":
+            if not settings.public_base_url:
+                raise HTTPException(400, "PUBLIC_BASE_URL is not set — start your tunnel (e.g. ngrok http 8000) and put its URL in .env")
+            if not settings.custom_llm_shared_secret:
+                raise HTTPException(400, "CUSTOM_LLM_SHARED_SECRET is not set in .env")
 
-        async with httpx.AsyncClient(timeout=30) as client:
-            secret_id = await _ensure_secret(client)
-            payload = _agent_payload(persona, secret_id)
+        async with httpx.AsyncClient(timeout=60) as client:
+            secret_id = None
+            knowledge_base: list[dict] = []
+            if settings.agent_llm_mode == "custom":
+                secret_id = await _ensure_secret(client)
+            else:
+                knowledge_base = await sync_knowledge_base(conn, client, persona["name"])
+            payload = _agent_payload(persona, secret_id, knowledge_base)
             if persona["agent_id"]:
                 resp = await client.patch(
                     f"{EL_BASE}/v1/convai/agents/{persona['agent_id']}",
@@ -108,7 +130,17 @@ async def provision_agent() -> dict:
             (agent_id,),
         )
         conn.commit()
-        return {"agent_id": agent_id, "custom_llm_url": settings.public_base_url.rstrip("/") + "/v1"}
+        return {
+            "agent_id": agent_id,
+            "llm_mode": settings.agent_llm_mode,
+            "llm": settings.agent_llm if settings.agent_llm_mode != "custom" else "custom-llm",
+            "knowledge_base_documents": len(knowledge_base),
+            "custom_llm_url": (
+                settings.public_base_url.rstrip("/") + "/v1"
+                if settings.agent_llm_mode == "custom"
+                else None
+            ),
+        }
     finally:
         conn.close()
 

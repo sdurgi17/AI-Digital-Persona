@@ -18,6 +18,11 @@ class UpdatePrompt(BaseModel):
     system_prompt: str
 
 
+class UpdateVoice(BaseModel):
+    voice_id: str
+    voice_kind: str = "pvc"  # ivc | pvc | library
+
+
 @router.get("")
 def get_persona_status() -> dict:
     conn = get_db()
@@ -74,6 +79,32 @@ async def build_persona() -> dict:
         )
         conn.commit()
         return {"status": new_status, "profile": profile, "interview_chunks": interview_chunks}
+    finally:
+        conn.close()
+
+
+@router.put("/voice")
+def update_voice(body: UpdateVoice) -> dict:
+    """Point the persona at an existing ElevenLabs voice (e.g. a Professional
+    Voice Clone trained in their dashboard) instead of the interview-built IVC."""
+    conn = get_db()
+    try:
+        persona = conn.execute("SELECT agent_id FROM persona WHERE id = 1").fetchone()
+        if not persona:
+            raise HTTPException(404, "Persona not created yet")
+        conn.execute(
+            """
+            UPDATE persona SET voice_id = ?, voice_kind = ?, status = ?,
+                   updated_at = datetime('now') WHERE id = 1
+            """,
+            (
+                body.voice_id.strip(),
+                body.voice_kind,
+                "agent_ready" if persona["agent_id"] else "voice_ready",
+            ),
+        )
+        conn.commit()
+        return {"voice_id": body.voice_id.strip(), "voice_kind": body.voice_kind}
     finally:
         conn.close()
 

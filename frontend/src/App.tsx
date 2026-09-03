@@ -17,7 +17,9 @@ const STEP_OF_ROUTE: Record<string, number> = {
   '/voice': 3,
 };
 
-const ROUTE_OF_STEP = ['/interview', '/clone', '/documents', '/chat'];
+// Step 4 is labelled "Live", so it goes to the voice call. Text chat is a side
+// path reached from the dashboard, not a step in the flow.
+const ROUTE_OF_STEP = ['/interview', '/clone', '/documents', '/voice'];
 
 export function LangToggle({ night }: { night?: boolean }) {
   const { lang, setLang } = useLang();

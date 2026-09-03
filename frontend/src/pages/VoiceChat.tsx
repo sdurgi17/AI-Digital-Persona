@@ -6,19 +6,23 @@ import { apiGet } from '../api';
 import Orb from '../components/Orb';
 import { clock, useLang } from '../i18n';
 
+/** WebRTC gets this long to establish before we fall back to WebSocket. */
+const WEBRTC_TIMEOUT_MS = 8000;
+
 interface Caption {
   who: 'you' | 'echo';
   text: string;
 }
 
 export default function VoiceChat() {
-  const { t, lang } = useLang();
+  const { t } = useLang();
   const navigate = useNavigate();
 
   const [captions, setCaptions] = useState<Caption[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [connecting, setConnecting] = useState(false);
   const [muted, setMuted] = useState(false);
+  const [transport, setTransport] = useState<'webrtc' | 'websocket' | null>(null);
   const [seconds, setSeconds] = useState(0);
   const timerRef = useRef<number | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -28,7 +32,10 @@ export default function VoiceChat() {
     onMessage: (message: { source: string; message: string }) =>
       setCaptions((cur) => [...cur, { who: message.source === 'user' ? 'you' : 'echo', text: message.message }]),
     onError: (message: string) => setError(String(message)),
-    onDisconnect: () => setConnecting(false),
+    onDisconnect: () => {
+      setConnecting(false);
+      setTransport(null);
+    },
   });
 
   const connected = conversation.status === 'connected';
@@ -58,21 +65,54 @@ export default function VoiceChat() {
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
       const session = await apiGet<{ token: string | null; signed_url: string | null }>('/api/agent/session');
-      const overrides = { agent: { language: lang } };
-      if (session.token) {
-        await conversation.startSession({
-          conversationToken: session.token,
+      // ElevenLabs Agents has no Telugu ('te') in its language list, so live calls
+      // are English-only even when the UI is set to Telugu.
+      const overrides = { agent: { language: 'en' } };
+
+      const startWebrtc = () =>
+        conversation.startSession({
+          conversationToken: session.token as string,
           connectionType: 'webrtc',
           overrides,
         } as Parameters<typeof conversation.startSession>[0]);
-      } else if (session.signed_url) {
-        await conversation.startSession({
-          signedUrl: session.signed_url,
+
+      const startWebsocket = () =>
+        conversation.startSession({
+          signedUrl: session.signed_url as string,
           connectionType: 'websocket',
           overrides,
         } as Parameters<typeof conversation.startSession>[0]);
-      } else {
+
+      if (!session.token && !session.signed_url) {
         throw new Error('Backend returned no session token or signed URL');
+      }
+
+      // WebRTC needs UDP/STUN, which some networks and VPNs drop silently — it
+      // hangs rather than throwing. Race it against a timeout and fall back to
+      // the WebSocket transport, which only needs an outbound wss connection.
+      if (session.token) {
+        try {
+          await Promise.race([
+            startWebrtc(),
+            new Promise((_, reject) =>
+              window.setTimeout(() => reject(new Error('webrtc-timeout')), WEBRTC_TIMEOUT_MS),
+            ),
+          ]);
+          setTransport('webrtc');
+        } catch (webrtcError) {
+          console.warn('WebRTC connect failed, falling back to WebSocket', webrtcError);
+          try {
+            await conversation.endSession();
+          } catch {
+            /* nothing to tear down */
+          }
+          if (!session.signed_url) throw webrtcError;
+          await startWebsocket();
+          setTransport('websocket');
+        }
+      } else {
+        await startWebsocket();
+        setTransport('websocket');
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -107,7 +147,7 @@ export default function VoiceChat() {
           {connected ? t.liveLabel : 'ECHO'}
         </div>
         <div className="call-meta">
-          {connected && <span className="call-pill">{t.v2v}</span>}
+          {connected && <span className="call-pill">{transport === 'websocket' ? 'WS' : t.v2v}</span>}
           <span>{clock(seconds)}</span>
         </div>
       </div>
