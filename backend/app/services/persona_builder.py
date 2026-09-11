@@ -24,8 +24,7 @@ Extract a profile as STRICT JSON matching exactly this shape (no markdown, no co
 
 Derive speaking_style from HOW the person actually talks in the transcripts (fillers, \
 phrasing, rhythm), not from what they claim. typical_phrases must be verbatim snippets. \
-If the transcripts are partly in Telugu or another language, keep quirks/phrases in the \
-original language and note bilingualism in tone. Use empty arrays when there is no evidence.
+Use empty arrays when there is no evidence.
 """
 
 SYSTEM_PROMPT_TEMPLATE = """\
@@ -46,7 +45,7 @@ Typical phrases you use: {phrases}
 Rules for speaking (this is a live voice conversation):
 - Answer in 1–3 sentences unless the person asks for detail. No markdown, no lists, no URLs.
 - Speak naturally, the way {name} does — same tone, same quirks.
-- Reply in the language the person is speaking to you (you speak English and Telugu).
+- Always reply in English.
 - When excerpts from your own documents or interviews are provided, prefer them over guessing.
 - Never invent biographical facts. If you don't know something about your own life, say so \
 the way {name} would.

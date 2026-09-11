@@ -2,13 +2,12 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiGet, apiUpload, Question } from '../api';
 import Recorder from '../components/Recorder';
-import { clock, fmt, useLang } from '../i18n';
+import { categoryHint, categoryLabel, clock, fmt, t } from '../strings';
 import { useAppState } from '../state';
 
 const CLONE_TARGET_SECONDS = 60;
 
 export default function Interview() {
-  const { t, question: localizedQuestion, category, hint } = useLang();
   const navigate = useNavigate();
   const { progress, refresh: refreshApp } = useAppState();
 
@@ -94,13 +93,13 @@ export default function Interview() {
           <span className="muted" style={{ fontSize: 13 }}>
             {fmt(t.qOf, { n: index + 1, t: questions.length })}
           </span>
-          <span className="tiny">{category(q.category)}</span>
+          <span className="tiny">{categoryLabel(q.category)}</span>
         </div>
 
         <h1 className="display md rise" key={q.id}>
-          {localizedQuestion(q.ord, q.text)}
+          {q.text}
         </h1>
-        <p className="muted" style={{ lineHeight: 1.6, margin: 0 }}>{hint(q.category)}</p>
+        <p className="muted" style={{ lineHeight: 1.6, margin: 0 }}>{categoryHint(q.category)}</p>
 
         {error && <div className="error-banner">{error}</div>}
 
@@ -153,7 +152,6 @@ function Captured({
   onRetake: () => void;
   onNext: () => void;
 }) {
-  const { t } = useLang();
   const transcribing = q.answer_status === 'recorded' || q.answer_status === 'transcribing';
   const failed = q.answer_status === 'error';
 

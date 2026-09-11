@@ -23,8 +23,8 @@
   --night: #171310;
   --night-ink: #f2ece4;
 
-  --ui: 'Geist', 'Noto Sans Telugu', system-ui, -apple-system, sans-serif;
-  --display: 'Instrument Serif', 'Noto Serif Telugu', Georgia, serif;
+  --ui: 'Geist', system-ui, -apple-system, sans-serif;
+  --display: 'Instrument Serif', Georgia, serif;
 }
 
 * { box-sizing: border-box; }
@@ -67,7 +67,7 @@ a:hover { color: var(--accent-lo); text-decoration: underline; }
   padding-left: 10px; border-left: 1px solid rgba(32, 27, 22, 0.12); margin-left: 2px;
 }
 
-.steps { display: flex; align-items: center; gap: 22px; padding-right: 120px; }
+.steps { display: flex; align-items: center; gap: 22px; }
 .step { display: flex; align-items: center; gap: 7px; background: none; border: none; padding: 0; cursor: pointer; font-family: var(--ui); }
 .step:disabled { cursor: default; }
 .step-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(32, 27, 22, 0.18); flex: none; }
@@ -75,22 +75,6 @@ a:hover { color: var(--accent-lo); text-decoration: underline; }
 .step.done .step-dot { background: var(--ok); }
 .step-label { font-size: 13px; font-weight: 500; color: var(--muted-2); }
 .step.active .step-label { font-weight: 600; color: var(--ink); }
-
-.lang-toggle {
-  position: fixed; top: 16px; right: 20px; z-index: 50;
-  display: flex; gap: 2px; background: var(--paper);
-  border: 1px solid rgba(32, 27, 22, 0.12); border-radius: 999px; padding: 3px;
-  box-shadow: 0 4px 14px rgba(32, 27, 22, 0.08);
-}
-.lang-toggle button {
-  border: none; border-radius: 999px; padding: 7px 14px;
-  font-size: 12.5px; font-weight: 600; font-family: var(--ui);
-  cursor: pointer; background: transparent; color: rgba(32, 27, 22, 0.6);
-}
-.lang-toggle button.active { background: var(--ink); color: var(--bg); }
-.lang-toggle.on-night { background: rgba(242, 236, 228, 0.1); border-color: rgba(242, 236, 228, 0.2); box-shadow: none; }
-.lang-toggle.on-night button { color: rgba(242, 236, 228, 0.65); }
-.lang-toggle.on-night button.active { background: var(--night-ink); color: var(--night); }
 
 /* ---------- stage containers ---------- */
 .stage { flex: 1; display: flex; flex-direction: column; }
@@ -361,7 +345,7 @@ textarea { min-height: 150px; line-height: 1.6; resize: vertical; font-size: 13.
 .call-top { display: flex; align-items: center; justify-content: space-between; padding: 22px 36px; }
 .call-live { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; }
 .call-live .dot { width: 8px; height: 8px; border-radius: 50%; background: #e0654f; animation: echoBlink 1.2s infinite; }
-.call-meta { display: flex; align-items: center; gap: 16px; font-size: 13px; opacity: 0.65; font-variant-numeric: tabular-nums; padding-right: 120px; }
+.call-meta { display: flex; align-items: center; gap: 16px; font-size: 13px; opacity: 0.65; font-variant-numeric: tabular-nums; }
 .call-pill { border: 1px solid rgba(242, 236, 228, 0.2); border-radius: 999px; padding: 4px 12px; font-size: 11.5px; }
 
 .call-body {
@@ -410,13 +394,11 @@ textarea { min-height: 150px; line-height: 1.6; resize: vertical; font-size: 13.
 
 /* ---------- responsive ---------- */
 @media (max-width: 900px) {
-  /* The language toggle is fixed top-right, so every top row reserves space for it. */
-  .topbar { padding: 16px 20px; padding-right: 124px; flex-wrap: wrap; gap: 10px; }
+  .topbar { padding: 16px 20px; flex-wrap: wrap; gap: 10px; }
   .brand-tagline { display: none; }
-  .steps { width: 100%; padding-right: 0; gap: 18px; }
+  .steps { width: 100%; gap: 18px; }
   .step-label { display: none; }
   .call-top { padding: 18px 20px; }
-  .call-meta { padding-right: 104px; }
 
   .interview { flex-direction: column; padding: 32px 20px; gap: 20px; }
   .interview-prompt .card.soft { margin-top: 0; }

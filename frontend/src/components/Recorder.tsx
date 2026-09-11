@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { clock, fmt, useLang } from '../i18n';
+import { clock, fmt, t } from '../strings';
 import Waveform from './Waveform';
 
 interface Props {
@@ -12,7 +12,6 @@ interface Props {
 type Phase = 'idle' | 'recording' | 'review' | 'uploading';
 
 export default function Recorder({ minSeconds, onAccept, onTick }: Props) {
-  const { t } = useLang();
   const [phase, setPhase] = useState<Phase>('idle');
   const [seconds, setSeconds] = useState(0);
   const [error, setError] = useState<string | null>(null);

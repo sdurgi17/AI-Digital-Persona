@@ -2,14 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiPost } from '../api';
 import Orb from '../components/Orb';
-import { clock, fmt, useLang } from '../i18n';
+import { clock, fmt, t } from '../strings';
 import { useAppState } from '../state';
 
 /** Where the creep stalls while we wait on ElevenLabs — the last stretch is the real response. */
 const CREEP_CEILING = 92;
 
 export default function VoiceClone() {
-  const { t } = useLang();
   const navigate = useNavigate();
   const { persona, progress, refresh, interviewDone, voiceDone } = useAppState();
 

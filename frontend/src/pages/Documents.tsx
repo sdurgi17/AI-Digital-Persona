@@ -1,13 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiDelete, apiGet, apiPost, apiUpload, Doc } from '../api';
-import { fmt, useLang } from '../i18n';
+import { fmt, t } from '../strings';
 import { useAppState } from '../state';
 
 const PASTE_PREFIX = 'Pasted note';
 
 export default function Documents() {
-  const { t } = useLang();
   const navigate = useNavigate();
   const { progress, voiceDone, refresh: refreshApp } = useAppState();
 
@@ -169,7 +168,6 @@ export default function Documents() {
 }
 
 function FileRow({ doc, onRemove }: { doc: Doc; onRemove: () => void }) {
-  const { t } = useLang();
   const ext = (doc.filename.split('.').pop() ?? 'txt').toUpperCase().slice(0, 4);
   const pending = doc.status === 'uploaded' || doc.status === 'processing';
   const failed = doc.status === 'error';

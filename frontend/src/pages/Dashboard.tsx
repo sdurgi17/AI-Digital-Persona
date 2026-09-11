@@ -2,11 +2,10 @@ import { ReactNode, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiGet, apiPost, Doc } from '../api';
 import Orb from '../components/Orb';
-import { clock, fmt, useLang } from '../i18n';
+import { clock, fmt, t } from '../strings';
 import { useAppState } from '../state';
 
 export default function Dashboard() {
-  const { t } = useLang();
   const navigate = useNavigate();
   const { persona, progress, loaded, refresh, missingKeys, profileDone, voiceDone, agentDone } = useAppState();
 
@@ -134,7 +133,6 @@ function SetupList({
   chunks: number;
   onNavigate: (to: string) => void;
 }) {
-  const { t } = useLang();
   const { progress, config, persona, interviewDone, profileDone, voiceDone, agentDone } = useAppState();
 
   return (
@@ -262,7 +260,6 @@ function Welcome({
   onBegin: () => void;
   questionCount: number;
 }) {
-  const { t } = useLang();
   const inputRef = useRef<HTMLInputElement>(null);
 
   return (

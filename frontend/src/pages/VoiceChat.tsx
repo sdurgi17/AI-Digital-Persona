@@ -1,10 +1,9 @@
 import { useConversation } from '@elevenlabs/react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LangToggle } from '../App';
 import { apiGet } from '../api';
 import Orb from '../components/Orb';
-import { clock, useLang } from '../i18n';
+import { clock, t } from '../strings';
 
 /** WebRTC gets this long to establish before we fall back to WebSocket. */
 const WEBRTC_TIMEOUT_MS = 8000;
@@ -15,7 +14,6 @@ interface Caption {
 }
 
 export default function VoiceChat() {
-  const { t } = useLang();
   const navigate = useNavigate();
 
   const [captions, setCaptions] = useState<Caption[]>([]);
@@ -65,22 +63,16 @@ export default function VoiceChat() {
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
       const session = await apiGet<{ token: string | null; signed_url: string | null }>('/api/agent/session');
-      // ElevenLabs Agents has no Telugu ('te') in its language list, so live calls
-      // are English-only even when the UI is set to Telugu.
-      const overrides = { agent: { language: 'en' } };
-
       const startWebrtc = () =>
         conversation.startSession({
           conversationToken: session.token as string,
           connectionType: 'webrtc',
-          overrides,
         } as Parameters<typeof conversation.startSession>[0]);
 
       const startWebsocket = () =>
         conversation.startSession({
           signedUrl: session.signed_url as string,
           connectionType: 'websocket',
-          overrides,
         } as Parameters<typeof conversation.startSession>[0]);
 
       if (!session.token && !session.signed_url) {
@@ -139,8 +131,6 @@ export default function VoiceChat() {
 
   return (
     <div className="call">
-      <LangToggle night />
-
       <div className="call-top">
         <div className="call-live">
           {connected && <span className="dot" />}

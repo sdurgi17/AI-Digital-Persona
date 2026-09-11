@@ -2,13 +2,12 @@
 
 Create an AI digital persona of yourself: the app interviews you (recording your voice),
 clones your voice with ElevenLabs Instant Voice Clone, ingests your documents for RAG,
-and then lets you hold a **real-time voice conversation** with your persona — in English
-or Telugu.
+and then lets you hold a **real-time voice conversation** with your persona, in English.
 
 ## Architecture
 
 - **Frontend**: Vite + React (TS) — the "Echo" flow: welcome → spoken interview → voice clone →
-  knowledge → live call, plus text chat, all bilingual (English/తెలుగు). Live voice goes through
+  knowledge → live call, plus text chat. English only. Live voice goes through
   `@elevenlabs/react` (WebRTC).
 - **Backend**: FastAPI — SQLite (+ `sqlite-vec` for vectors in the same DB file), Scribe STT
   for interview transcription, IVC voice cloning, document ingestion/chunking/embedding,
@@ -51,8 +50,7 @@ npm run dev                # http://localhost:5173
 ## Usage flow
 
 The welcome screen walks you straight through steps 1–4; the dashboard is where you come back to
-for anything still outstanding. Use the EN/తెలుగు toggle (top right) at any point — it switches the
-whole interface, including the interview questions and the language the live agent speaks.
+for anything still outstanding.
 
 1. **Welcome** → enter your name to create the persona, then "Begin the interview".
 2. **Interview** → answer 6 short questions (~3 min total). Recordings are transcribed with
@@ -62,7 +60,7 @@ whole interface, including the interview questions and the language the live age
 4. **Knowledge** (optional) → drop in PDFs/DOCX/TXT/MD or paste raw text; the persona cites them.
    "Create my persona" then extracts your bio/values/speaking style into the system prompt and
    indexes the transcripts for RAG.
-5. **Text chat** → test the persona brain for free (works in English and Telugu).
+5. **Text chat** → test the persona brain for free.
 6. **Live voice**:
    ```bash
    ngrok http 8000                     # note the https URL
@@ -99,8 +97,6 @@ A wrong api_key must return 401. If this streams correctly, the voice agent will
   with `PUT /api/persona/voice`.
 - **Editing `.env` alone changes nothing.** `get_settings()` is cached and `--reload`
   watches `backend/`, not the repo-root `.env` — restart uvicorn after every edit.
-- **Telugu live calls are not possible.** ElevenLabs Agents supports `hi` and `ta` but
-  not `te`, so calls are English-only; text chat still handles Telugu.
 - **Silent agent in voice chat** ⇒ the tunnel is down or `PUBLIC_BASE_URL` changed
   (only matters in `custom` mode). Restart the tunnel, update `.env`, restart uvicorn,
   hit "Re-sync" on the dashboard.

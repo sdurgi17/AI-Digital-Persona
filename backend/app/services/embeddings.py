@@ -30,7 +30,7 @@ class OpenAIEmbedder:
 
 
 class FastEmbedEmbedder:
-    """Local ONNX embeddings, no API key. Weak for Telugu; prefer openai there."""
+    """Local ONNX embeddings, no API key."""
 
     def __init__(self) -> None:
         from fastembed import TextEmbedding

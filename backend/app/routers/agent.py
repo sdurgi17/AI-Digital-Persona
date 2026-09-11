@@ -81,7 +81,6 @@ def _agent_payload(persona, secret_id: str | None, knowledge_base: list[dict]) -
             },
         },
         "platform_settings": {
-            "overrides": {"conversation_config_override": {"agent": {"language": True}}},
             "auth": {"enable_auth": True},
         },
     }

@@ -1,6 +1,6 @@
 import { BrowserRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import { useLang } from './i18n';
 import { useAppState } from './state';
+import { t } from './strings';
 import Dashboard from './pages/Dashboard';
 import Documents from './pages/Documents';
 import Interview from './pages/Interview';
@@ -21,22 +21,7 @@ const STEP_OF_ROUTE: Record<string, number> = {
 // path reached from the dashboard, not a step in the flow.
 const ROUTE_OF_STEP = ['/interview', '/clone', '/documents', '/voice'];
 
-export function LangToggle({ night }: { night?: boolean }) {
-  const { lang, setLang } = useLang();
-  return (
-    <div className={`lang-toggle${night ? ' on-night' : ''}`}>
-      <button className={lang === 'en' ? 'active' : ''} onClick={() => setLang('en')}>
-        EN
-      </button>
-      <button className={lang === 'te' ? 'active' : ''} onClick={() => setLang('te')}>
-        తెలుగు
-      </button>
-    </div>
-  );
-}
-
 function TopBar() {
-  const { t } = useLang();
   const { interviewDone, profileDone, voiceDone, agentDone } = useAppState();
   const location = useLocation();
   const navigate = useNavigate();
@@ -77,7 +62,6 @@ function Shell() {
 
   return (
     <div className="app">
-      {!onCall && <LangToggle />}
       {showHeader && <TopBar />}
       <Routes>
         <Route path="/" element={<Dashboard />} />

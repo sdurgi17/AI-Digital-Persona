@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import { streamSSE } from '../api';
-import { useLang } from '../i18n';
+import { t } from '../strings';
 
 interface Msg {
   role: 'user' | 'assistant';
@@ -8,7 +8,6 @@ interface Msg {
 }
 
 export default function TextChat() {
-  const { t } = useLang();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
