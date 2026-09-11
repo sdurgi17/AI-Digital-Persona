@@ -1,19 +1,20 @@
-.env
+# Secrets — covers .env, .env.bak, .env.local, etc. Keep the template tracked.
+.env*
+!.env.example
+.DS_Store
+
+# Python
 __pycache__/
 *.pyc
 .venv/
 venv/
-.DS_Store
+*.egg-info/
+.pytest_cache/
 
-# Persona artifacts (large, regeneratable)
-personas/*/sources/
-personas/*/source_audio.*
-personas/*/memories.db
+# Runtime data (SQLite, audio recordings, uploads)
+backend/data/
 
-# Runtime
-runs/
-stage_cache/
-
-# Models
-*.bin
-lid.176.bin
+# Node
+node_modules/
+frontend/dist/
+*.tsbuildinfo
